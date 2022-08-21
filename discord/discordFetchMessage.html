@@ -1,0 +1,76 @@
+a
+<script type="text/javascript">
+  RED.nodes.registerType("discordFetchMessage", {
+    category: "discord",
+    color: "#7289da",
+    defaults: {
+      name: {
+        value: "",
+        required: false,
+      },
+      channel: {
+        value: null,
+        required: false,
+      },
+      token: {
+        value: "",
+        required: true,
+        type: "discord-token",
+      },
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "discord.png",
+    label: function () {
+      return this.name || "discordFetchMessage";
+    },
+  });
+</script>
+<script type="text/x-red" data-template-name="discordFetchMessage">
+  <div class="form-row">
+        <label for="node-input-token"><i class="icon-tag"></i> token</label>
+        <input type="text" id="node-input-token" placeholder="token">
+    </div>
+    <div class="form-row">
+        <label for="node-input-channel"><i class="icon-tag"></i> Channel</label>
+        <input type="text" id="node-input-channel" name="ch" placeholder="Channel ID">
+        <p>(leave 'channel' blank to use <code>msg.channel</code> as channel ID to send to)</p>
+    </div>
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+<script type="text/x-red" data-help-name="discordFetchMessage">
+  <p>Node to refresh or fetch messages in Discord</p>
+  <!--
+    <p>More support can be found <a href="https://github.com/Markoudstaal/node-red-contrib-discord-advanced/wiki/discordFetchMessage">here</a>.</p>
+  -->
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>message
+      <span class="property-type">string</span>
+    </dt>
+    <dd>The id for the message.</dd>
+    <dt>channel
+      <span class="property-type">Object or string</span>
+    </dt>
+    <dd>The channel Object or channel id of the message.</dd>
+  </dl>
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+      <dt>payload <span class="property-type">string</span></dt>
+      <dd>the textual content of the message</dd>
+      <dt>channel <span class="property-type">Object</span></dt>
+      <dd>an Object containing info on the channel the message was sent in</dd>
+      <dt>author <span class="property-type">Object</span></dt>
+      <dd>an Object containing info on the author of the message</dd>
+      <dt>memberRoleNames <span class="property-type">Array</span></dt>
+      <dd>an array of all the roles names the author has</dd>
+      <dt>memberRoleIDs <span class="property-type">Array</span></dt>
+      <dd>an array of all the roles IDs the author has</dd>
+      <dt>data <span class="property-type">Object</span></dt>
+      <dd>the full message Object sent by discord</dd>
+  </dl>
+</script>
