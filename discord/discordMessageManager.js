@@ -207,15 +207,17 @@ module.exports = function (RED) {
         var components = [];
         if (inputComponents) {
           inputComponents.forEach(component => {
-            if(component.type == 1)
+            if(component.type == 1 || component.type == "ACTION_ROW")
             {
               var actionRow = new MessageActionRow();
               component.components.forEach(subComponentData => {
                 switch (subComponentData.type) {
                   case 2:
+                  case "BUTTON":
                     actionRow.addComponents(new MessageButton(subComponentData));
                     break;
                   case 3:
+                  case "SELECT":
                     actionRow.addComponents(new MessageSelectMenu(subComponentData));                    
                     break;
                 }
