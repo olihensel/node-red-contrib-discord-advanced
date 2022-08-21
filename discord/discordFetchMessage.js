@@ -86,9 +86,12 @@ module.exports = function (RED) {
               Flatted.stringify(message.attachments)
             );
             outMessage.data.reference = message.reference;
-            // TODO: probablyy also use flatted (if necessary). this leads to a error on emoji buttons, maybe due to Object.getOwnProperies?
-            outMessage.data.embeds = message.embeds;
-            outMessage.data.components = message.components;
+            outMessage.data.embeds = Flatted.parse(
+              Flatted.stringify(message.embeds)
+            );
+            outMessage.data.components = Flatted.parse(
+              Flatted.stringify(message.components)
+            );
           } catch (e) {
             node.warn("Could not set `msg.data`: JSON serialization failed");
           }

@@ -80,8 +80,8 @@ module.exports = function (RED) {
           else {
             message.payload.message = Flatted.parse(Flatted.stringify(interaction.message));
             message.payload.message.author = Flatted.parse(Flatted.stringify(interaction.message.author));
-            message.payload.message.embeds = interaction.message.embeds;
-            message.payload.message.components =  interaction.message.components;
+            message.payload.message.embeds = Flatted.parse(Flatted.stringify(interaction.message.embeds));
+            message.payload.message.components = Flatted.parse(Flatted.stringify(interaction.message.components));
           }
 
           node.send(message);

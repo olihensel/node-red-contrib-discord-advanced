@@ -42,6 +42,8 @@ module.exports = function (RED) {
             msg.data = Flatted.parse(Flatted.stringify(message));
             msg.data.attachments = Flatted.parse(Flatted.stringify(message.attachments));
             msg.data.reference = message.reference;
+            msg.data.embeds = Flatted.parse(Flatted.stringify(message.embeds));
+            msg.data.components = Flatted.parse(Flatted.stringify(message.components));
           } catch (e) {
             node.warn("Could not set `msg.data`: JSON serialization failed");
           }
