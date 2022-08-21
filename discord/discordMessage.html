@@ -11,6 +11,10 @@
         value: "",
         required: true,
         type: "discord-token"
+      },
+      allowSelf: {
+        value: false,
+        required: false,
       }
     },
     inputs: 0,
@@ -18,7 +22,7 @@
     icon: "discord.png",
     label: function () {
       return this.name || "discordMessage";
-    }
+    },
   });
 </script>
 <script type="text/x-red" data-template-name="discordMessage">
@@ -30,6 +34,10 @@
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
+   <div class="form-row">
+      <label for="node-input-allowSelf" style="width:130px"><i class="fa fa-pencil"></i> Also emit Messages from Bot User </label>
+      <input type="checkbox" id="node-input-allowSelf">
+  </div>
 </script>
 <script type="text/x-red" data-help-name="discordMessage">
   <p>Node to recieve discord messages</p>

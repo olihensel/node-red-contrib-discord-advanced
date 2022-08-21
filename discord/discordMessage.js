@@ -23,7 +23,7 @@ module.exports = function (RED) {
       }
 
       registerCallback('messageCreate', message => {
-        if (message.author !== bot.user) {
+        if (config.allowSelf || message.author !== bot.user) {
           var msgid = RED.util.generateId();
           var msg = {
             _msgid: msgid
