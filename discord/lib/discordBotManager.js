@@ -1,8 +1,7 @@
-const {
-  Client,
-  Intents,
-} = require('discord.js');
-require('./bigint-compat');
+//@ts-check
+
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
+require("./bigint-compat");
 
 var bots = new Map();
 var getBot = function (configNode) {
@@ -11,26 +10,25 @@ var getBot = function (configNode) {
     if (bots.get(configNode) === undefined) {
       bot = new Client({
         intents: [
-          Intents.FLAGS.GUILDS,
-          Intents.FLAGS.GUILD_MESSAGES,
-          Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-          Intents.FLAGS.DIRECT_MESSAGES,
-          Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-          Intents.FLAGS.GUILD_VOICE_STATES
+          GatewayIntentBits.Guilds,
+          GatewayIntentBits.GuildMessages,
+          GatewayIntentBits.GuildMessageReactions,
+          GatewayIntentBits.DirectMessages,
+          GatewayIntentBits.DirectMessageReactions,
+          GatewayIntentBits.GuildVoiceStates,
         ],
-        partials: [
-          "CHANNEL",
-          "USER",
-          "MESSAGE"
-        ]
+        partials: [Partials.Channel, Partials.User, Partials.Message],
       });
       bots.set(configNode, bot);
       bot.numReferences = (bot.numReferences || 0) + 1;
-      bot.login(configNode.token).then(function () {
-        resolve(bot);
-      }).catch(function (err) {
-        reject(err);
-      });
+      bot
+        .login(configNode.token)
+        .then(function () {
+          resolve(bot);
+        })
+        .catch(function (err) {
+          reject(err);
+        });
     } else {
       bot = bots.get(configNode);
       bot.numReferences = (bot.numReferences || 0) + 1;
@@ -56,5 +54,5 @@ var closeBot = function (bot) {
 };
 module.exports = {
   getBot: getBot,
-  closeBot: closeBot
-}
+  closeBot: closeBot,
+};
