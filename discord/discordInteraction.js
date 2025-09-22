@@ -1,3 +1,4 @@
+//@ts-check
 const Flatted = require("flatted");
 module.exports = function (RED) {
   var discordBotManager = require("./lib/discordBotManager.js");
@@ -14,131 +15,153 @@ module.exports = function (RED) {
 
     discordBotManager
       .getBot(configNode)
-      .then(function (bot) {
-        var callbacks = [];
-        node.status({
-          fill: "green",
-          shape: "dot",
-          text: "ready",
-        });
-
-        const matchInteractionType = (interaction) => {
-          switch (interactionType) {
-            case "button":
-              return interaction.isButton();
-            case "selectMenu":
-              return interaction.isSelectMenu();
-            case "command":
-              return interaction.isCommand();
-            case "messageContextMenu":
-              return interaction.isMessageContextMenu();
-            case "all":
-              return true;
-            default:
-              return false;
-          }
-        };
-
-        var registerCallback = function (eventName, listener) {
-          callbacks.push({
-            eventName: eventName,
-            listener: listener,
+      .then(
+        /**
+         *
+         * @param {import("discord.js").Client} bot
+         */
+        function (bot) {
+          var callbacks = [];
+          node.status({
+            fill: "green",
+            shape: "dot",
+            text: "ready",
           });
-          bot.on(eventName, listener);
-        };
 
-        registerCallback("interactionCreate", async (interaction) => {
-          try {
-            if (!matchInteractionType(interaction)) return;
-
-            if (interaction.isCommand() || interaction.isMessageContextMenu()) {
-              if (
-                custom_id &&
-                custom_id.split(",").indexOf(interaction.commandName) < 0
-              )
-                return;
-              await interaction.reply({
-                content: commandResponse,
-                ephemeral: ephemeral,
-              });
-            } else {
-              if (
-                custom_id &&
-                custom_id.split(",").indexOf(interaction.customId) < 0
-              )
-                return;
-              await interaction.deferUpdate();
+          /**
+           * @param {import("discord.js").Interaction} interaction
+           */
+          const matchInteractionType = (interaction) => {
+            switch (interactionType) {
+              case "button":
+                return interaction.isButton();
+              case "selectMenu":
+                return interaction.isSelectMenu();
+              case "command":
+                return interaction.isCommand();
+              case "messageContextMenu":
+                return interaction.isMessageContextMenuCommand();
+              case "all":
+                return true;
+              default:
+                return false;
             }
+          };
 
-            let message = {};
-            message.payload = Flatted.parse(Flatted.stringify(interaction));
-            message.payload.user = Flatted.parse(
-              Flatted.stringify(interaction.user)
-            );
+          var registerCallback = function (eventName, listener) {
+            callbacks.push({
+              eventName: eventName,
+              listener: listener,
+            });
+            bot.on(eventName, listener);
+          };
 
-            if (interaction.member !== null) {
-              message.payload.member = Flatted.parse(
-                Flatted.stringify(interaction.member)
-              );
-              message.payload.member.guild = Flatted.parse(
-                Flatted.stringify(interaction.member.guild)
-              );
-            } else {
-              message.payload.member = null;
+          registerCallback(
+            "interactionCreate",
+            /**
+             *
+             * @param {import("discord.js").Interaction} interaction
+             */
+            async (interaction) => {
+              try {
+                if (!matchInteractionType(interaction)) return;
+
+                if (
+                  interaction.isCommand() ||
+                  interaction.isMessageContextMenuCommand()
+                ) {
+                  if (
+                    custom_id &&
+                    custom_id.split(",").indexOf(interaction.commandName) < 0
+                  )
+                    return;
+                  await interaction.reply({
+                    content: commandResponse,
+                    ephemeral: ephemeral,
+                  });
+                } else {
+                  if (
+                    custom_id &&
+                    custom_id.split(",").indexOf(interaction.customId) < 0
+                  )
+                    return;
+                  await interaction.deferUpdate();
+                }
+
+                let message = {};
+                message.payload = Flatted.parse(Flatted.stringify(interaction));
+                message.payload.user = Flatted.parse(
+                  Flatted.stringify(interaction.user)
+                );
+
+                if (interaction.member !== null) {
+                  message.payload.member = Flatted.parse(
+                    Flatted.stringify(interaction.member)
+                  );
+                  message.payload.member.guild = Flatted.parse(
+                    Flatted.stringify(interaction.member.guild)
+                  );
+                } else {
+                  message.payload.member = null;
+                }
+
+                if (injectInteractionObject)
+                  message.interactionObject = interaction;
+
+                if (
+                  interaction.isCommand() ||
+                  interaction.isMessageContextMenuCommand()
+                ) {
+                  message.payload.options = Flatted.parse(
+                    Flatted.stringify(interaction.options)
+                  );
+                  message.payload.replyMessage = Flatted.parse(
+                    Flatted.stringify(await interaction.fetchReply())
+                  );
+                } else {
+                  message.payload.message = Flatted.parse(
+                    Flatted.stringify(interaction.message)
+                  );
+                  message.payload.message.author = Flatted.parse(
+                    Flatted.stringify(interaction.message.author)
+                  );
+                  message.payload.message.embeds = Flatted.parse(
+                    Flatted.stringify(interaction.message.embeds)
+                  );
+                  message.payload.message.components = Flatted.parse(
+                    Flatted.stringify(interaction.message.components)
+                  );
+                }
+
+                node.send(message);
+              } catch (error) {
+                node.error(error);
+                node.status({
+                  fill: "red",
+                  shape: "dot",
+                  text: error,
+                });
+              }
             }
+          );
 
-            if (injectInteractionObject)
-              message.interactionObject = interaction;
-
-            if (interaction.isCommand() || interaction.isMessageContextMenu()) {
-              message.payload.options = Flatted.parse(
-                Flatted.stringify(interaction.options)
-              );
-              message.payload.replyMessage = Flatted.parse(
-                Flatted.stringify(await interaction.fetchReply())
-              );
-            } else {
-              message.payload.message = Flatted.parse(
-                Flatted.stringify(interaction.message)
-              );
-              message.payload.message.author = Flatted.parse(
-                Flatted.stringify(interaction.message.author)
-              );
-              message.payload.message.embeds = Flatted.parse(
-                Flatted.stringify(interaction.message.embeds)
-              );
-              message.payload.message.components = Flatted.parse(
-                Flatted.stringify(interaction.message.components)
-              );
-            }
-
-            node.send(message);
-          } catch (error) {
-            node.error(error);
+          registerCallback("error", (err) => {
+            node.error(err);
             node.status({
               fill: "red",
               shape: "dot",
-              text: error,
+              text: err,
             });
-          }
-        });
-
-        registerCallback("error", (err) => {
-          node.error(err);
-          node.status({
-            fill: "red",
-            shape: "dot",
-            text: err,
           });
-        });
 
-        node.on("close", function () {
-          callbacks.forEach(function (cb) {
-            bot.removeListener(cb.eventName, cb.listener);
+          node.on("close", function () {
+            callbacks.forEach(function (cb) {
+              bot.removeListener(cb.eventName, cb.listener);
+            });
+            discordBotManager.closeBot(bot);
           });
-          discordBotManager.closeBot(bot);
-        });
-      })
+        }
+      )
       .catch(function (err) {
         node.error(err);
         node.status({
