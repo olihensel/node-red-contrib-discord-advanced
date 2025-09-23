@@ -2,11 +2,11 @@ module.exports = function (RED) {
   var discordBotManager = require("./lib/discordBotManager.js");
   const Flatted = require("flatted");
   const {
-    MessageAttachment,
-    MessageEmbed,
-    MessageActionRow,
-    MessageButton,
-    MessageSelectMenu,
+    AttachmentBuilder,
+    EmbedBuilder,
+    ActionRowBuilder,
+    ButtonBuilder,
+    StringSelectMenuBuilder,
   } = require("discord.js");
 
   const checkString = (field) => (typeof field === "string" ? field : false);
@@ -199,10 +199,10 @@ module.exports = function (RED) {
           var attachments = [];
           if (inputAttachments) {
             if (typeof inputAttachments === "string") {
-              attachments.push(new MessageAttachment(inputAttachments));
+              attachments.push(new AttachmentBuilder(inputAttachments));
             } else if (Array.isArray(inputAttachments)) {
               inputAttachments.forEach((attachment) => {
-                attachments.push(new MessageAttachment(attachment));
+                attachments.push(new AttachmentBuilder(attachment));
               });
             } else {
               setError("msg.attachments isn't a string or array");
@@ -213,10 +213,10 @@ module.exports = function (RED) {
           if (inputEmbeds) {
             if (Array.isArray(inputEmbeds)) {
               inputEmbeds.forEach((embed) => {
-                embeds.push(new MessageEmbed(embed));
+                embeds.push(new EmbedBuilder(embed));
               });
             } else if (typeof inputEmbeds === "object") {
-              embeds.push(new MessageEmbed(inputEmbeds));
+              embeds.push(new EmbedBuilder(inputEmbeds));
             } else {
               setError("msg.embeds isn't a string or array");
             }
@@ -226,19 +226,19 @@ module.exports = function (RED) {
           if (inputComponents) {
             inputComponents.forEach((component) => {
               if (component.type == 1 || component.type == "ACTION_ROW") {
-                var actionRow = new MessageActionRow();
+                var actionRow = new ActionRowBuilder();
                 component.components.forEach((subComponentData) => {
                   switch (subComponentData.type) {
                     case 2:
                     case "BUTTON":
                       actionRow.addComponents(
-                        new MessageButton(subComponentData)
+                        new ButtonBuilder(subComponentData)
                       );
                       break;
                     case 3:
                     case "SELECT":
                       actionRow.addComponents(
-                        new MessageSelectMenu(subComponentData)
+                        new StringSelectMenuBuilder(subComponentData)
                       );
                       break;
                   }
